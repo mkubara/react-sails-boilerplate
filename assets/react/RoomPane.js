@@ -19,7 +19,7 @@ export default class RoomPane extends React.Component {
 class RoomList extends React.Component {
   render () {
     const roomNodes = this.props.rooms.map((room) => {
-      return ( <Room key={room.id} {...room} /> );
+      return ( <Room key={room.id} {...room}  onRoomChange={this.props.onRoomChange} /> );
     });
 
     return (
@@ -32,10 +32,14 @@ class RoomList extends React.Component {
 
 
 class Room extends React.Component {
+  _handleClick(e) {
+    this.props.onRoomChange(this.props.id);
+  }
+
   render () {
     return (
       <li>
-        <p>{this.props.name}</p>
+        <p onClick={this._handleClick.bind(this)}>{this.props.name}</p>
       </li>
     )
   }

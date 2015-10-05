@@ -1,7 +1,11 @@
 'use strict';
 
 import React from 'react';
+import _ from 'lodash';
+
 import RoomPane from './RoomPane';
+import MessagePane from './MessagePane';
+
 
 export default class Main extends React.Component {
   constructor() {
@@ -11,11 +15,11 @@ export default class Main extends React.Component {
       rooms: [{
         id: 1,
         name: 'room1',
-        messages: [ {id: 1, message: 'asdf'} ]
+        messages: [ {id: 1, content: 'asdf'} ]
       }, {
         id: 2,
         name: 'asdf',
-        messages: [ {id: 2, message: 'qwer'} ]
+        messages: [ {id: 2, content: 'qwer'} ]
       }],
       currentRoom: null
     };
@@ -26,26 +30,49 @@ export default class Main extends React.Component {
   _addRoom(roomName) {
     console.log(`addRoom: ${roomName}`);
 
-    // stateを複製し、新しいRoom要素を追加
     const newRooms = [].concat(this.state.rooms);
     newRooms.push({
       id: newRooms.length + 1,
       name: roomName,
-      comments: []
+      messages: []
     });
 
-    // 複製した要素で、現在のStateを差し替える。
-    // 変更したStateは、すべての子要素に自動的に通知される
     this.setState({
       rooms: newRooms
     });
   }
 
+  _changeRoom(roomId) {
+    console.log(`changeRoom: ${roomId}`);
+
+    const newState = _.cloneDeep(this.state);
+    newState.currentRoom = _.find(newState.rooms, (room) => {
+      return room.id === roomId;
+    });
+
+    this.setState(newState);
+  }
+
+  _addMessage(message) {
+    console.log(`addMessage: ${message}`);
+
+    const newState = _.cloneDeep(this.state);
+    newState.currentRoom = _.find(newState.rooms, (room) => {
+      return room.id === this.state.currentRoom.id;
+    });
+    newState.currentRoom.messages.push({
+      id: newState.currentRoom.messages.length + 1,
+      content: message
+    });
+
+    this.setState(newState);
+  }
+
   render() {
     return (
       <div id="page">
-        {/* イベントハンドラを子へ渡す、必ず .bind(this) すること！ */}
-        <RoomPane {...this.state}  onAddRoom={this._addRoom.bind(this)} />
+        <RoomPane rooms={this.state.rooms} onRoomChange={this._changeRoom.bind(this)} onAddRoom={this._addRoom.bind(this)} />
+        <MessagePane room={this.state.currentRoom} onAddMessage={this._addMessage.bind(this)} />
       </div>
     );
   }
